@@ -1,190 +1,104 @@
 # Fashion Recommendation System
 
-An image-based fashion recommendation web app built with Streamlit, TensorFlow (ResNet50), and cosine similarity.
+An intelligent, image-based fashion recommendation web application built with Streamlit, TensorFlow (ResNet50), and Scikit-Learn. 
 
-Upload a product image, and the app retrieves visually similar items from a catalog using precomputed embeddings.
+Simply upload a picture of a fashion product, and the application will act as a visual search engine, retrieving visually similar items from a catalog using precomputed deep learning embeddings.
 
-## Overview
+## ⚠️ Important Note on Large Files (GitHub Releases)
 
-This project performs visual similarity search for fashion products.
+Due to GitHub's repository size limits, the large data files required to run this project are **not** stored directly in the main repository tree. Instead, they are hosted in the **[Releases](../../releases)** section of this repository.
 
-- Query input: user-uploaded image
-- Feature extractor: pre-trained ResNet50 (ImageNet)
-- Retrieval engine: cosine similarity against catalog embeddings
-- Output: top similar products with image + product name
+* **Dynamically Fetched Files:** The core dataset files (`metadados.csv`, `embeddings.csv`, and `df_sample.csv`) are automatically downloaded at runtime by `app.py` via their direct release URLs. You do not need to download these manually.
+* **Local Images Directory:** To display the recommended items, the app requires a local `images` folder. Because of the large volume of product images, you must manually download the images archive from the Releases section and extract it into the project root before running the app.
 
-## Core Features
+## Overview & Architecture
 
-- Streamlit web interface for quick interactive use
-- ResNet50-based feature extraction for uploaded images
-- Top-N nearest-neighbor recommendation using cosine similarity
-- Hosted dataset loading from GitHub release assets
-- Local image rendering for recommended items from images folder
+This project performs a visual similarity search for fashion products.
+
+- **Query Input:** User-uploaded image (Supports JPG, PNG, WEBP, JPEG, etc.).
+- **Feature Extractor:** Pre-trained ResNet50 model (ImageNet weights) with global average pooling.
+- **Retrieval Engine:** Cosine similarity scoring against precomputed catalog embeddings.
+- **Output:** Top-N visually similar products displayed with their product names and thumbnail images.
+
+### How It Works Behind the Scenes
+1. **Data Initialization:** `app.py` fetches the catalog metadata and the embedding matrix directly from the hosted CSV files in GitHub Releases.
+2. **Matrix Prep:** It filters the `embeddings.csv` to keep only numeric columns, forming a 2D float32 embedding matrix.
+3. **Model Loading:** Initializes ResNet50 to extract a fixed-length feature vector.
+4. **Image Processing:** When a user uploads an image, it is resized to 224x224 and preprocessed according to ResNet50 standards.
+5. **Similarity Search:** The app computes the cosine similarity between the uploaded image's feature vector and all embeddings in the catalog.
+6. **Result Rendering:** The top matches are selected, cross-referenced with `df_sample.csv`, and displayed using the local `images` directory.
 
 ## Project Structure
 
 ```text
 .
-|-- app.py
-|-- requirements.txt
-|-- README.md
-|-- df_sample.csv
-|-- metadados.csv
-|-- embeddings.csv
-|-- embeddings.npy
-|-- model_embeddings.npy
-`-- resnet_embeddings.npy
+|-- app.py                # Main Streamlit application script
+|-- requirements.txt      # Python dependencies
+|-- README.md             # Project documentation
+`-- images/               # MUST BE DOWNLOADED FROM RELEASES (Contains product thumbnails)
 ```
-
-Notes:
-- The running app currently reads CSV data from hosted URLs configured inside app.py.
-- Local CSV/NPY files may be historical or alternative artifacts.
-
-## How It Works
-
-1. Load catalog metadata and embedding matrix from hosted CSV files.
-2. Keep only numeric columns from embeddings.csv to form a 2D embedding matrix.
-3. Initialize ResNet50 with global average pooling to get a fixed-length feature vector.
-4. User uploads a JPG image in the Streamlit UI.
-5. App preprocesses the image (resize to 224x224 + ResNet preprocessing).
-6. App extracts query embedding and computes cosine similarity to all catalog embeddings.
-7. Top matches are selected and displayed with product names and images.
-
-## Data Sources (Configured in app.py)
-
-- metadados.csv
-	- https://github.com/syedanxsali-design/Fashion-recommendation-system/releases/download/metadados.csv/metadados.csv
-- embeddings.csv
-	- https://github.com/syedanxsali-design/Fashion-recommendation-system/releases/download/embeddings.csv/embeddings.csv
-- df_sample.csv
-	- https://github.com/syedanxsali-design/Fashion-recommendation-system/releases/download/df_sample.csv/df_sample.csv
-
-## Data Contract
-
-### df_sample.csv
-
-Expected minimum columns used by the app:
-- image
-- productDisplayName
-
-For local image mode:
-- image values should match filenames present in images directory (for example 15970.jpg).
-
-Other metadata columns (for example gender, category, color, season) can exist and are useful for analysis.
-
-### embeddings.csv
-Source: https://github.com/syedanxsali-design/Fashion-recommendation-system/releases/download/model_embeddings.npy/model_embeddings.npy
-
-Expected format:
-- One row per catalog item
-- Numeric embedding columns (for example 0..2047)
-- Optional extra non-numeric/index columns are ignored by the app
-
-Important:
-- Row order in embeddings.csv must align exactly with row order in df_sample.csv.
-
-### metadados.csv
-
-Currently loaded but not directly used in recommendation scoring.
-It can be used in future for filtering, faceted search, reranking, or UI enrichment.
 
 ## Requirements
 
 - Python 3.9+ recommended
-- Internet connection (to download hosted CSV files and pretrained ResNet50 weights)
+- Stable Internet connection (required to dynamically fetch CSVs and download ResNet50 weights)
 
-Python dependencies are listed in requirements.txt:
-- streamlit
-- tensorflow
-- scikit-learn
-- pandas
-- numpy
-- Pillow
+Dependencies:
+- `streamlit`
+- `tensorflow`
+- `scikit-learn`
+- `pandas`
+- `numpy`
+- `Pillow`
 
-## Installation
+## Installation & Setup
 
+**1. Clone the repository**
 ```bash
-# 1) Clone and enter project
 git clone <your-repo-url>
-cd FRS
+cd Fashion-recommendation-system
+```
 
-# 2) Create virtual environment
+**2. Create and activate a virtual environment**
+```bash
 python -m venv .venv
 
-# 3) Activate virtual environment
-# Windows PowerShell
+# On Windows PowerShell:
 .venv\Scripts\Activate.ps1
 
-# 4) Install dependencies
+# On Linux/macOS:
+source .venv/bin/activate
+```
+
+**3. Install required dependencies**
+```bash
 pip install -r requirements.txt
 ```
 
-## Run The App
+**4. Download the Images Dataset (Crucial Step)**
+* Go to the **Releases** section of this GitHub repository.
+* Download the zipped images archive (e.g., `images.zip`).
+* Extract the contents directly into the root folder of this project so that the path looks exactly like this: `Fashion-recommendation-system/images/`.
+
+## Running the Application
+
+Once your dependencies are installed and your `images` folder is securely in place, start the Streamlit server:
 
 ```bash
 streamlit run app.py
 ```
 
-Then open the local URL shown in your terminal (typically http://localhost:8501).
-
-## Usage
-
-1. Launch the Streamlit app.
-2. Upload a JPG PNG JPEG WEBP image.
-3. Wait for feature extraction and similarity search.
-4. Review recommended products shown in the grid.
+Open the local network URL provided in your terminal (usually `http://localhost:8501`). Upload an image and wait for the ResNet50 model to extract features and fetch your recommendations!
 
 ## Troubleshooting
 
-### 1) TensorFlow installation issues
+- **Slow First Run:** The very first time you process an image, TensorFlow will download the ResNet50 pretrained weights. This may take a minute depending on your internet speed.
+- **Data Loading Failures:** Because `app.py` fetches CSVs from GitHub Releases (`metadados.csv`, `embeddings.csv`, `df_sample.csv`), ensure your network does not block GitHub URLs. 
+- **Missing Recommended Images:** If the app runs but displays errors where the images should be, ensure your `images` folder is correctly extracted in the same directory as `app.py` and that the filenames map correctly to the entries in `df_sample.csv`.
 
-- Update pip first:
+## Suggested Future Enhancements
 
-```bash
-python -m pip install --upgrade pip
+- **Streamlit Caching:** Implement `@st.cache_data` for the remote CSV downloads and `@st.cache_resource` for the ResNet50 model initialization to drastically improve reload speeds.
+- **Format Migration:** Migrate the hosted embeddings from CSV to `.npy` format for faster network transmission and parsing.
+- **Metadata Filtering:** Utilize the currently unused `metadados.csv` to allow users to filter recommendations by gender, category, or season.
 ```
-
-- Ensure your Python version is supported by the TensorFlow version resolved by pip.
-
-### 2) Slow first run
-
-- The first run may take longer because ResNet50 pretrained weights are downloaded.
-
-### 3) Network/data loading failures
-
-- The app depends on external CSV URLs; if offline or blocked, loading will fail.
-- Confirm URLs are reachable from your network.
-
-### 4) Shape/alignment mismatch
-
-If you see similarity computation errors, verify:
-- embeddings.csv has numeric vectors with consistent length
-- number/order of rows in embeddings.csv matches df_sample.csv
-
-### 5) Recommended image not found
-
-- The app loads recommendations from local images directory.
-- Ensure image files exist under images and match names in df_sample.csv image column.
-
-## Known Limitations
-
-- Upload type is currently restricted to JPG only
-- metadados.csv is loaded but not yet used in ranking/filtering
-- No caching for dataset/model loading in current script
-- Local images directory is required for recommendation thumbnails
-
-## Suggested Enhancements
-
-- Add Streamlit caching:
-	- st.cache_data for CSV loads
-	- st.cache_resource for model initialization
-- Add UI controls for top-N recommendations
-- Support PNG and JPEG file uploads
-- Add metadata filters (gender/category/usage/season)
-- Add robust handling for missing/corrupt local image files
-- Optionally migrate from CSV embeddings to NPY for faster startup
-
-## License
-
-No license file is currently included in this repository.
-Add a LICENSE file if you want to define usage and distribution rights.
