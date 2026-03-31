@@ -130,7 +130,7 @@ Then open the local URL shown in your terminal (typically http://localhost:8501)
 ## Usage
 
 1. Launch the Streamlit app.
-2. Upload a JPG image.
+2. Upload a JPG PNG JPEG WEBP image.
 3. Wait for feature extraction and similarity search.
 4. Review recommended products shown in the grid.
 
