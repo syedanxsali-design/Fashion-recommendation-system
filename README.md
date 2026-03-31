@@ -73,6 +73,7 @@ For local image mode:
 Other metadata columns (for example gender, category, color, season) can exist and are useful for analysis.
 
 ### embeddings.csv
+Source: https://github.com/syedanxsali-design/Fashion-recommendation-system/releases/download/model_embeddings.npy/model_embeddings.npy
 
 Expected format:
 - One row per catalog item
